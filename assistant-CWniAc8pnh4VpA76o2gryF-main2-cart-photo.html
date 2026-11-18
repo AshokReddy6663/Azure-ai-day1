@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pet Pals · simple pet store</title>
+    <!-- simple, clean styling, no external dependencies -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #fef9f2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        /* main app container – feels like a mobile app card */
+        .pet-store-app {
+            max-width: 1100px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 2.5rem;
+            padding: 2rem 2rem 2.5rem;
+            box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.15), 0 8px 20px -8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #f0e5d8;
+        }
+
+        /* header section */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-icon {
+            font-size: 2.2rem;
+            line-height: 1;
+        }
+
+        .logo-text {
+            font-size: 1.9rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #3b2b1a;
+        }
+
+        .logo-text span {
+            color: #e07c4c;
+            font-weight: 800;
+        }
+
+        .cart-badge {
+            background: #f5ede2;
+            padding: 0.6rem 1.2rem;
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            font-weight: 600;
+            color: #3b2b1a;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+            cursor: default;
+            transition: background 0.2s;
+        }
+
+        .cart-badge i {
+            font-style: normal;
+            font-size: 1.3rem;
+        }
+
+        .cart-count {
+            background: #e07c4c;
+            color: white;
+            border-radius: 50%;
+            width: 1.6rem;
+            height: 1.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        /* filter / category row – purely visual, simple */
+        .category-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-bottom: 2rem;
+            border-bottom: 2px dashed #f0e0d0;
+            padding-bottom: 1.2rem;
+        }
+
+        .chip {
+            background: #ffffff;
+            border: 1.5px solid #e9d9c8;
+            padding: 0.5rem 1.3rem;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4e3e2e;
+            transition: all 0.1s ease;
+            cursor: default;
+        }
+
+        .chip.active {
+            background: #e07c4c;
+            border-color: #e07c4c;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 6px 12px -6px rgba(224, 124, 76, 0.4);
+        }
+
+        /* pet grid – main content */
+        .pet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 1.8rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* pet card */
+        .pet-card {
+            background: #ffffff;
+            border-radius: 1.8rem;
+            padding: 1.5rem 1.2rem 1.5rem;
+            box-shadow: 0 10px 20px -8px rgba(0, 0, 0, 0.08);
+            border: 1px solid #f1e6db;
+            transition: transform 0.15s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            cursor: default;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 22px 28px -12px rgba(92, 60, 36, 0.18);
+            border-color: #e9cdb6;
+        }
+
+        .pet-avatar {
+            font-size: 4.2rem;
+            line-height: 1;
+            margin-bottom: 0.8rem;
+            filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.05));
+        }
+
+        .pet-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            color: #2e241b;
+            margin-bottom: 0.3rem;
+        }
+
+        .pet-breed {
+            font-size: 0.85rem;
+            color: #a48d78;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.8rem;
+            background: #faf4ed;
+            padding: 0.25rem 0.9rem;
+            border-radius: 40px;
+        }
+
+        .pet-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #e07c4c;
+            margin-bottom: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.2rem;
+        }
+
+        .pet-price small {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #a48d78;
+            margin-left: 0.2rem;
+        }
+
+        .adopt-btn {
+            background: #f5ede2;
+            border: none;
+            border-radius: 60px;
+            padding: 0.9rem 1rem;
+            font-weight: 700;
+            color: #3b2b1a;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            border: 1px solid transparent;
+            margin-top: 0.4rem;
+        }
+
+        .adopt-btn:hover {
+            background: #e07c4c;
+            color: white;
+            box-shadow: 0 8px 16px -6px #e07c4c80;
+        }
+
+        .adopt-btn:active {
+            transform: scale(0.97);
+        }
+
+        .adopt-btn i {
+            font-style: normal;
+            font-size: 1.1rem;
+        }
+
+        /* footer info / total */
+        .store-footer {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding-top: 1.2rem;
+            border-top: 2px dashed #f0e0d0;
+            color: #6b5844;
+            font-weight: 500;
+        }
+
+        .total-pets {
+            background: #faf4ed;
+            padding: 0.5rem 1.2rem;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .total-pets span {
+            font-weight: 800;
+            color: #e07c4c;
+            font-size: 1.2rem;
+            margin-right: 0.15rem;
+        }
+
+        .note {
+            font-size: 0.9rem;
+            color: #b7a28e;
+            letter-spacing: 0.01em;
+        }
+
+        /* simple responsive */
+        .logo-text {
+                font-size: 1.5rem;
+            }
+            .logo-icon {
+                font-size: 1.8rem;
+            }
+            .pet-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 1rem;
+            }
+            .pet-avatar {
+                font-size: 3rem;
+            }
+            .pet-name {
+                font-size: 1.2rem;
+            }
+            .pet-price {
+                font-size: 1.2rem;
+            }
+            .adopt-btn {
+                font-size: 0.8rem;
+                padding: 0.7rem 0.5rem;
+            }
+        }
+    
+
+        /* category chips styling like design */
+        .category-chips {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding-bottom: 1.2rem;
+            border-bottom: 2px dashed #f6e6da;
+            align-items: center;
+        }
+        .chip {
+            background: #fff;
+            border: 1.5px solid #f1dcca;
+            padding: 0.6rem 1.2rem;
+            border-radius: 30px;
+            font-size: 0.95rem;
+            color: #5b4637;
+            cursor: pointer;
+        }
+        .chip.active {
+            background: #e07c4c;
+            color: #fff;
+            box-shadow: 0 8px 18px -12px rgba(224,124,76,0.6);
+            border-color: transparent;
+        }
+
+        /* card grid: 3 columns desktop */
+        .pet-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2.2rem;
+        }
+
+        .pet-card {
+            border-radius: 18px;
+            padding: 2rem 1.5rem 1.6rem;
+            text-align: center;
+            background: #fff;
+            border: 1px solid #faefe4;
+            box-shadow: 0 18px 30px -18px rgba(224,124,76,0.07);
+        }
+
+        .pet-avatar {
+            font-size: 4.8rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .pet-name {
+            font-size: 1.45rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .pet-breed {
+            display: inline-block;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            background: #fbf3ec;
+            color: #b89578;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            margin-bottom: 0.9rem;
+        }
+
+        .pet-price {
+            color: #e07c4c;
+            font-size: 1.45rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .adopt-btn {
+            background: #f4ebe3;
+            border-radius: 40px;
+            padding: 0.85rem 1rem;
+            font-weight: 800;
+            width: 100%;
+            border: none;
+            color: #4a3221;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:0.6rem;
+        }
+        .adopt-btn:hover { background:#e07c4c; color:#fff; box-shadow: 0 12px 20px -12px rgba(224,124,76,0.5); }
+
+        /* spacing to match image (larger container) */
+        .pet-store-app { padding: 3rem; max-width: 1200px; }
+
+</style>
+</head>
+<body>
+    <!-- main app container – looks like a mobile screen card -->
+    <div class="pet-store-app">
+
+        <!-- header: logo + cart -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">🐾</div>
+                <div class="logo-text">Pet<span>Pals</span></div>
+            </div>
+            <div class="cart-badge">
+                <i>🛒</i> Cart
+                <span class="cart-count" id="cartCount">0</span>
+            </div>
+        </header>
+
+        <!-- category chips (decorative / filter style) -->
+        <div class="category-chips">
+            <div class="chip active" data-cat="all">All pets</div>
+            <div class="chip" data-cat="dogs">Dogs</div>
+            <div class="chip" data-cat="cats">Cats</div>
+            <div class="chip" data-cat="birds">Birds</div>
+            <div class="chip" data-cat="small">Small & Furry</div>
+        </div></div>
+
+        <!-- pet grid – the main store items -->
+        <div class="pet-grid" id="petGrid">
+            <!-- pet 1 -->
+            <div class="pet-card" data-category="dogs">
+                <div class="pet-avatar">🐶</div>
+                <div class="pet-name">Buddy</div>
+                <div class="pet-breed">Golden Retriever</div>
+                <div class="pet-price">$249 <small>or adopt</small></div>
+                <button class="adopt-btn" data-pet="Buddy" data-price="249">
+                    <i>❤️</i>/i> Adopt me
+                </button>
+            </div>
+            <!-- pet 2 -->
+            <div class="pet-card" data-category="cats">
+                <div class="pet-avatar">🐱</div>
+                <div class="pet-name">Luna</div>
+                <div class="pet-breed">Maine Coon</div>
+                <div class="pet-price">$129 <small>or adopt</small></div>
+                <button class="adopt-btn" data-pet="Luna" data-price="129">
+                    <i>❤️</i>/i> Adopt me
+                </button>
+            </div>
+            <!-- pet 3 -->
+            <div class="pet-card" data-category="small">
+                <div class="pet-avatar">🐹</div>
+                <div class="pet-name">Peanut</div>
+                <div class="pet-breed">Syrian Hamster</div>
+                <div class="pet-price">$25 <small>or adopt</small></div>
+                <button class="adopt-btn" data-pet="Peanut" data-price="25">
+                    <i>❤️</i>/i> Adopt me
+                </button>
+            </div>
+            <!-- pet 4 -->
+            <div class="pet-card" data-category="birds">
+                <div class="pet-avatar">🦜</div>
+                <div class="pet-name">Kiwi</div>
+                <div class="pet-breed">Budgie</div>
+                <div class="pet-price">$45 <small>or adopt</small></div>
+                <button class="adopt-btn" data-pet="Kiwi" data-price="45">
+                    <i>❤️</i>/i> Adopt me
+                </button>
+            </div>
+            <!-- pet 5 -->
+            <div class="pet-card" data-category="small">
+                <div class="pet-avatar">🐰</div>
+                <div class="pet-name">Clover</div>
+                <div class="pet-breed">Holland Lop</div>
+                <div class="pet-price">$80 <small>or adopt</small></div>
+                <button class="adopt-btn" data-pet="Clover" data-price="80">
+                    <i>❤️</i>/i> Adopt me
+                </button>
+            </div>
+            <!-- pet 6 -->
+            <div class="pet-card" data-category="dogs">
+                <div class="pet-avatar">🐕</div>
+                <div class="pet-name">Max</div>
+                <div class="pet-breed">Beagle</div>
+                <div class="pet-price">$199 <small>or adopt</small></div>
+                <button class="adopt-btn" data-pet="Max" data-price="199">
+                    <i>❤️</i>/i> Adopt me
+                </button>
+            </div>
+        
+        <!-- cart view (hidden by default) -->
+        <div id="cartView" style="display:none; margin-top:1.2rem;">
+            <h3 style="margin-bottom:0.6rem; color:#3b2b1a;">Your Adoption Cart</h3>
+            <div id="cartItemsList" style="display:flex; flex-direction:column; gap:0.8rem;"></div>
+            <div style="margin-top:0.9rem; display:flex; gap:0.6rem;">
+                <button id="backToStore" class="adopt-btn" style="width:auto; padding:0.6rem 1rem;">Back to store</button>
+                <button id="clearCart" class="adopt-btn" style="background:#e07c4c; color:white; width:auto; padding:0.6rem 1rem;">Clear cart</button>
+            </div>
+        </div>
+    </div>
+
+        <!-- footer: total pets & dynamic cart status -->
+        <div class="store-footer">
+            <div class="total-pets">
+                <span>🐾</span> 6 lovely pets available
+            </div>
+            <div class="note" id="cartMessage">
+                ❤️ Click "Adopt me" to add to cart
+            </div>
+        </div>
+    </div>
+
+    <!-- simple interactive script (only for cart feedback – keeps the app feel) -->
+    
+    <script>
+        (function() {
+            // --- state ---
+            let cartItems = 0;
+            const cart = []; // array of {name, price, avatar, category}
+
+            const cartCountEl = document.getElementById('cartCount');
+            const cartMessageEl = document.getElementById('cartMessage');
+            const petGridEl = document.getElementById('petGrid');
+            const cartViewEl = document.getElementById('cartView');
+            const cartItemsListEl = document.getElementById('cartItemsList');
+            const backToStoreBtn = document.getElementById('backToStore');
+            const clearCartBtn = document.getElementById('clearCart');
+
+            // all adopt buttons (live NodeList)
+            function getAdoptButtons() {
+                return document.querySelectorAll('.adopt-btn');
+            }
+
+            // helper to update UI
+            function updateCartDisplay() {
+                cartCountEl.textContent = cartItems;
+                if (cartItems === 0) {
+                    cartMessageEl.textContent = '❤️ Click "Adopt me" to add to cart';
+                } else if (cartItems === 1) {
+                    cartMessageEl.textContent = '🎉 1 pet in your adoption cart!';
+                } else {
+                    cartMessageEl.textContent = `🎉 ${cartItems} pets in your adoption cart!`;
+                }
+            }
+
+            // render cart list in cart view
+            function renderCartList() {
+                cartItemsListEl.innerHTML = '';
+                if (cart.length === 0) {
+                    cartItemsListEl.innerHTML = '<div class="note">Your cart is empty.</div>';
+                    return;
+                }
+                cart.forEach((item, idx) => {
+                    const div = document.createElement('div');
+                    div.style.display = 'flex';
+                    div.style.alignItems = 'center';
+                    div.style.justifyContent = 'space-between';
+                    div.style.padding = '0.6rem 0.8rem';
+                    div.style.borderRadius = '12px';
+                    div.style.background = '#fff7f0';
+                    div.style.border = '1px solid #f1e0d6';
+
+                    // Left: photo + name/category + purchased label under photo
+                    const left = document.createElement('div');
+                    left.style.display = 'flex';
+                    left.style.alignItems = 'center';
+                    left.style.gap = '0.8rem';
+
+                    const photoWrap = document.createElement('div');
+                    photoWrap.style.display = 'flex';
+                    photoWrap.style.flexDirection = 'column';
+                    photoWrap.style.alignItems = 'center';
+                    photoWrap.style.gap = '0.4rem';
+
+                    const photo = document.createElement('div');
+                    photo.style.width = '64px';
+                    photo.style.height = '64px';
+                    photo.style.borderRadius = '12px';
+                    photo.style.display = 'flex';
+                    photo.style.alignItems = 'center';
+                    photo.style.justifyContent = 'center';
+                    photo.style.fontSize = '2rem';
+                    photo.style.background = '#fff';
+                    photo.style.boxShadow = '0 6px 12px -8px rgba(92,60,36,0.08)';
+                    photo.textContent = item.avatar || '';
+
+                    const purchased = document.createElement('div');
+                    purchased.textContent = 'Purchased';
+                    purchased.style.fontSize = '0.75rem';
+                    purchased.style.color = '#b89578';
+                    purchased.style.fontWeight = '700';
+
+                    photoWrap.appendChild(photo);
+                    photoWrap.appendChild(purchased);
+
+                    const info = document.createElement('div');
+                    info.innerHTML = `<div style="font-weight:700;">${item.name}</div><div style="font-size:0.85rem;color:#a48d78;">${item.category}</div>`;
+
+                    left.appendChild(photoWrap);
+                    left.appendChild(info);
+
+                    // Right: price + remove button
+                    const right = document.createElement('div');
+                    right.style.display = 'flex';
+                    right.style.alignItems = 'center';
+                    right.style.gap = '0.6rem';
+                    right.innerHTML = `<div style="font-weight:800;color:#e07c4c;">$${item.price}</div>`;
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = 'Remove';
+                    removeBtn.className = 'adopt-btn';
+                    removeBtn.style.width = 'auto';
+                    removeBtn.addEventListener('click', function() {
+                        cart.splice(idx, 1);
+                        cartItems = cart.length;
+                        updateCartDisplay();
+                        renderCartList();
+                    });
+
+                    right.appendChild(removeBtn);
+                    div.appendChild(left);
+                    div.appendChild(right);
+                    cartItemsListEl.appendChild(div);
+                });
+            }            // function to handle adoption (adding to cart)
+            function adoptPetFromButton(btn) {
+                const petName = btn.getAttribute('data-pet') || 'pet';
+                const price = btn.getAttribute('data-price') || '?';
+                // find avatar and category from nearest card
+                const card = btn.closest('.pet-card');
+                const avatar = card ? (card.querySelector('.pet-avatar') ? card.querySelector('.pet-avatar').textContent : '') : '';
+                const category = card ? (card.getAttribute('data-category') || '') : '';
+                cart.push({name: petName, price: price, avatar: avatar, category: category});
+                cartItems = cart.length;
+                updateCartDisplay();
+
+                // small visual feedback on button
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i>✅</i> Added!';
+                btn.style.background = '#b1d8b7';
+                btn.style.color = '#1e3a2b';
+                btn.disabled = true;
+                btn.style.cursor = 'default';
+
+                // revert button after 1.2 sec
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.style.background = '';
+                    btn.style.color = '';
+                    btn.disabled = false;
+                    btn.style.cursor = 'pointer';
+                }, 1200);
+            }
+
+            // attach listeners to adopt buttons
+            function attachAdoptListeners() {
+                getAdoptButtons().forEach(btn => {
+                    // remove existing to avoid double attach
+                    btn.replaceWith(btn.cloneNode(true));
+                });
+                // re-select after clone
+                getAdoptButtons().forEach(btn => {
+                    btn.addEventListener('click', function(e) {
+                        adoptPetFromButton(this);
+                    });
+                });
+            }
+
+            // initial attach
+            attachAdoptListeners();
+
+            // interactive category chips – filtering
+            const chips = document.querySelectorAll('.chip');
+            const petCards = document.querySelectorAll('.pet-card');
+
+            chips.forEach(chip => {
+                chip.addEventListener('click', function () {
+                    chips.forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+
+                    const cat = this.getAttribute('data-cat') || 'all';
+                    if (cat === 'all') {
+                        petCards.forEach(card => card.style.display = '');
+                    } else {
+                        petCards.forEach(card => {
+                            const cardCat = card.getAttribute('data-category') || '';
+                            if (cardCat === cat) {
+                                card.style.display = '';
+                            } else {
+                                card.style.display = 'none';
+                            }
+                        });
+                    }
+
+                    // small temporary note
+                    cartMessageEl.textContent = `🐕 Showing ${this.textContent.toLowerCase()}`;
+                    setTimeout(() => {
+                        updateCartDisplay();
+                    }, 1200);
+                });
+            });
+
+            // cart badge click -> show cart view
+            const cartBadge = document.querySelector('.cart-badge');
+            cartBadge.addEventListener('click', function() {
+                // toggle cart view
+                const showingCart = cartViewEl.style.display !== 'none';
+                if (!showingCart) {
+                    petGridEl.style.display = 'none';
+                    cartViewEl.style.display = '';
+                    renderCartList();
+                } else {
+                    cartViewEl.style.display = 'none';
+                    petGridEl.style.display = '';
+                }
+            });
+
+            // back button from cart view
+            backToStoreBtn.addEventListener('click', function() {
+                cartViewEl.style.display = 'none';
+                petGridEl.style.display = '';
+            });
+
+            // clear cart
+            clearCartBtn.addEventListener('click', function() {
+                cart.length = 0;
+                cartItems = 0;
+                updateCartDisplay();
+                renderCartList();
+            });
+
+            // initialize cart display
+            updateCartDisplay();
+        })();
+    </script>
+
+</body>
+</html>
